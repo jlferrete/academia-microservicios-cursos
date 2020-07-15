@@ -126,11 +126,11 @@ public class Curso {
 		this.cursoAlumnos = cursoAlumnos;
 	}
 	
-	public void addCursoAlumnos(CursoAlumno cursoAlumno) {
+	public void addCursoAlumno(CursoAlumno cursoAlumno) {
 		this.cursoAlumnos.add(cursoAlumno);
 	}
 	
-	public void removeCursoAlumnos(CursoAlumno cursoAlumno) {
+	public void removeCursoAlumno(CursoAlumno cursoAlumno) {
 		this.cursoAlumnos.remove(cursoAlumno);
 	}
 	
