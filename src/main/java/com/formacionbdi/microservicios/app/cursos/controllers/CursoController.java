@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -46,6 +48,21 @@ public class CursoController extends CommonController<Curso, CursoService> {
 		return ResponseEntity.ok().body(cursos);
 	}
 	
+	@GetMapping("/pagina")
+	@Override
+	public ResponseEntity<?> listar(Pageable pageable) {
+		Page<Curso> cursos = service.findAll(pageable).map(curso -> {
+			curso.getCursoAlumnos().forEach(ca -> {
+				Alumno alumno = new Alumno();
+				alumno.setId(ca.getAlumnoId());
+				curso.addAlumno(alumno);
+			});
+			return curso;
+		});
+		
+		return ResponseEntity.ok().body(cursos);
+	}
+	
 	@GetMapping("/{id}")
 	@Override
 	public ResponseEntity<?> ver(@PathVariable Long id) {
@@ -68,6 +85,8 @@ public class CursoController extends CommonController<Curso, CursoService> {
 				
 		return ResponseEntity.ok().body(curso);
 	}
+	
+
 	
 	@GetMapping("/balanceador-test")
 	public ResponseEntity<?> balanceadorTest() {
