@@ -33,13 +33,13 @@ public class CursoController extends CommonController<Curso, CursoService> {
 
 	@Value("${config.balanceador.test}")
 	private String balanceadorTest;
-	
+
 	@DeleteMapping("/eliminar-alumno/{id}")
-	public ResponseEntity<?> eliminarCursoAlumnoPorId(@PathVariable Long id){
+	public ResponseEntity<?> eliminarCursoAlumnoPorId(@PathVariable Long id) {
 		service.eliminarCursoAlumnoPorId(id);
 		return ResponseEntity.noContent().build();
 	}
-	
+
 	@GetMapping
 	@Override
 	public ResponseEntity<?> listar() {
@@ -51,10 +51,10 @@ public class CursoController extends CommonController<Curso, CursoService> {
 			});
 			return c;
 		}).collect(Collectors.toList());
-		
+
 		return ResponseEntity.ok().body(cursos);
 	}
-	
+
 	@GetMapping("/pagina")
 	@Override
 	public ResponseEntity<?> listar(Pageable pageable) {
@@ -66,35 +66,32 @@ public class CursoController extends CommonController<Curso, CursoService> {
 			});
 			return curso;
 		});
-		
+
 		return ResponseEntity.ok().body(cursos);
 	}
-	
+
 	@GetMapping("/{id}")
 	@Override
 	public ResponseEntity<?> ver(@PathVariable Long id) {
-		
+
 		Optional<Curso> o = service.findById(id);
-		
-		if(o.isEmpty()) {
+
+		if (o.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		
+
 		Curso curso = o.get();
-		if(curso.getCursoAlumnos().isEmpty() == false) {
-			List<Long> ids = curso.getCursoAlumnos().stream().map(ca -> ca.getAlumnoId())
-					.collect(Collectors.toList());
-			
+		if (curso.getCursoAlumnos().isEmpty() == false) {
+			List<Long> ids = curso.getCursoAlumnos().stream().map(ca -> ca.getAlumnoId()).collect(Collectors.toList());
+
 			List<Alumno> alumnos = (List<Alumno>) service.obtenerAlumnosPorCurso(ids);
-			
+
 			curso.setAlumnos(alumnos);
 		}
-				
+
 		return ResponseEntity.ok().body(curso);
 	}
-	
 
-	
 	@GetMapping("/balanceador-test")
 	public ResponseEntity<?> balanceadorTest() {
 		Map<String, Object> response = new HashMap<String, Object>();
@@ -102,7 +99,7 @@ public class CursoController extends CommonController<Curso, CursoService> {
 		response.put("cursos", service.findAll());
 		return ResponseEntity.ok(response);
 	}
-	
+
 	@PutMapping("/{id}")
 	public ResponseEntity<?> editar(@Valid @RequestBody Curso curso, BindingResult result, @PathVariable Long id) {
 
@@ -130,7 +127,7 @@ public class CursoController extends CommonController<Curso, CursoService> {
 		Curso dbCurso = o.get();
 
 		alumnos.forEach(a -> {
-			
+
 			CursoAlumno cursoAlumno = new CursoAlumno();
 			cursoAlumno.setAlumnoId(a.getId());
 			cursoAlumno.setCurso(dbCurso);
@@ -161,20 +158,22 @@ public class CursoController extends CommonController<Curso, CursoService> {
 
 		Curso curso = service.findCursoByAlumnoId(id);
 
-		if(curso != null) {
-			List<Long> examenesId = (List<Long>) service.obtenerExamenesIdsConRespuestasAlumno(id);
+		if (curso != null) {
+			List<Long> examenesIds = (List<Long>) service.obtenerExamenesIdsConRespuestasAlumno(id);
 			
-			List<Examen> examenes = curso.getExamenes().stream().map(examen -> {
-				if(examenesId.contains(examen.getId())) {
-					examen.setRespondido(true);
-				}
-				
-				return examen;
-			}).collect(Collectors.toList());
-			
-			curso.setExamenes(examenes);
+			if (examenesIds != null && examenesIds.size() > 0) {
+				List<Examen> examenes = curso.getExamenes().stream().map(examen -> {
+					if (examenesIds.contains(examen.getId())) {
+						examen.setRespondido(true);
+					}
+
+					return examen;
+				}).collect(Collectors.toList());
+
+				curso.setExamenes(examenes);
+			}
 		}
-		
+
 		return ResponseEntity.ok(curso);
 	}
 
@@ -207,9 +206,5 @@ public class CursoController extends CommonController<Curso, CursoService> {
 		return ResponseEntity.status(HttpStatus.CREATED).body(this.service.save(dbCurso));
 
 	}
-
-
-	
-	
 
 }
